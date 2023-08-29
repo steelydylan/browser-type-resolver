@@ -3,6 +3,9 @@ name: PR Release
 on:
   pull_request:
 
+permissions:
+  pull-requests: write
+
 jobs:
   pr-release:
     runs-on: ubuntu-latest
