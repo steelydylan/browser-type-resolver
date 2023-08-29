@@ -105,9 +105,9 @@ async function setDependencies({
   library: string,
   version: string,
   parentModule: string
-}) {
+}): Promise<{ [key: string ]: string }> {
   const storageKey = `dependencies:${library}@${version}${parentModule}`
-  const savedDependencies = await localforage.getItem(storageKey);
+  const savedDependencies = await localforage.getItem(storageKey) as { [key: string]: string } | null;
   if (savedDependencies) {
     return savedDependencies;
   }
