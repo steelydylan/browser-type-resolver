@@ -1,0 +1,5 @@
+src/*
+dist/*
+.github/*
+node_modules/*
+index.html

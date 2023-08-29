@@ -26,7 +26,7 @@ jobs:
         run: npm ci # or pnpm install
 
       - name: Build
-        run: npm build:lib # or pnpm build
+        run: npm run build:lib # or pnpm build
 
       - name: Publish
         uses: kotarella1110/pr-voyager@v0
