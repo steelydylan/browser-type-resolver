@@ -6,6 +6,12 @@
 
 https://browser-type-resolver.vercel.app
 
+## Install
+
+```bash
+npm i browser-type-resolver
+```
+
 ## Usage
 
 ```ts
