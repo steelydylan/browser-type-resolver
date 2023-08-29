@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { resolveAllModuleType } from "./type-resolver";
-import ReactJson from 'react-json-view'
+import JsonView from '@uiw/react-json-view';
+import { lightTheme } from '@uiw/react-json-view/light';
 
 const deps = {
   "react": "18.2.0",
@@ -24,7 +25,18 @@ function App() {
     <pre>
       <code>{JSON.stringify(deps, null, 2)}</code>
     </pre>
-    <ReactJson src={dependencies} name="node_modules" collapseStringsAfterLength={10} sortKeys />
+    <JsonView value={dependencies} style={lightTheme} />
+    <style>
+      {`
+        .w-rjv-value {
+          width: 200px;
+          white-space: nowrap;
+          display: inline-block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      `}
+    </style>
   </div>)
 }
 
