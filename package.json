@@ -1,7 +1,7 @@
 {
   "name": "browser-type-resolver",
-  "main": "./lib/type-test.js",
-  "types": "./lib/type-test.d.ts",
+  "main": "./lib/type-resolver.js",
+  "types": "./lib/type-resolver.d.ts",
   "version": "0.0.1",
   "scripts": {
     "dev": "vite",
@@ -10,9 +10,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/steelydylan/type-tester.git"
+    "url": "https://github.com/steelydylan/browser-type-resolver.git"
   },
-  "homepage": "https://github.com/steelydylan/type-tester",
+  "homepage": "https://github.com/steelydylan/browser-type-resolver",
   "devDependencies": {
     "@types/react-dom": "^18.2.7",
     "prettier": "^3.0.2",
