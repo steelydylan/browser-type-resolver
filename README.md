@@ -1,5 +1,7 @@
 # Browser Type Resolver
 
+![](./screenshot.png)
+
 ## Usage
 
 ```ts
