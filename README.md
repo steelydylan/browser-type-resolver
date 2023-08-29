@@ -2,6 +2,10 @@
 
 ![](./screenshot.png)
 
+## Demo Page
+
+https://browser-type-resolver.vercel.app
+
 ## Usage
 
 ```ts
