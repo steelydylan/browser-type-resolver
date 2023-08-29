@@ -25,6 +25,7 @@ function App() {
     <pre>
       <code>{JSON.stringify(deps, null, 2)}</code>
     </pre>
+    {/* @ts-expect-error */}
     <JsonView value={dependencies} style={lightTheme} />
     <style>
       {`
