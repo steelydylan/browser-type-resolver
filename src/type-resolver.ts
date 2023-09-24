@@ -125,7 +125,9 @@ async function setDependencies({
     if (!moduleName) {
       return dependencies;
     }
-    dependencies[moduleName] = simplifyImport(content);
+    if (simplifyImport(content)) {
+      dependencies[moduleName] = simplifyImport(content);
+    }
     // Import statements
     const importUrls = (
       content.match(
@@ -239,6 +241,7 @@ async function setDependencies({
         continue;
       }
       urlsetter.add(url);
+
       await processFile(url ?? "", dependencies).catch(() => {
         // ignore
       });
