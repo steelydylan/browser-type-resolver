@@ -44,6 +44,8 @@ function simplifyImport(input: string): string {
 
   const referenceRegex =
     /\/\/\/\s+<reference\s+path="https:\/\/esm\.sh\/v\d+\/(.*?)@\d.*?"\s+\/>/g;
+
+  const requiredRegex = /require\(['"]https:\/\/esm\.sh\/v\d+\/(.*?)@\d.*?['"]\)/g;
   return input
     .replace(regex, (url, importPart, libraryName) => {
       const parts = url.split("/");
@@ -81,6 +83,9 @@ function simplifyImport(input: string): string {
     })
     .replace(referenceRegex, (_, libraryName) => {
       return `/// <reference path="${libraryName.replace(/@types\//, "")}" />`;
+    })
+    .replace(requiredRegex, (_, libraryName) => {
+      return `require('${libraryName.replace(/@types\//, "")}')`;
     });
 }
 
@@ -154,6 +159,12 @@ async function setDependencies({
       content.match(/\/\/\/ <reference path="[^"]+" \/>/g) || []
     ).map((line) => line.match(/"[^"]+"/)?.[0]?.replace(/"/g, ""));
 
+    const requiredPaths = (
+      content.match(
+        /require\(['"]https:\/\/esm\.sh\/v\d+\/[^']+['"]\)/g
+      ) || []
+    ).map((line) => line.match(/'https:\/\/esm\.sh\/[^']+'/)?.[0]);
+
     for (const url of importUrls || []) {
       if (!url) {
         continue;
@@ -216,6 +227,19 @@ async function setDependencies({
       }
       urlsetter.add(refUrl.toString());
       await processFile(refUrl.toString(), dependencies).catch(() => {
+        // ignore
+      });
+    }
+
+    for (const url of requiredPaths || []) {
+      if (!url) {
+        continue;
+      }
+      if (urlsetter.has(url)) {
+        continue;
+      }
+      urlsetter.add(url);
+      await processFile(url ?? "", dependencies).catch(() => {
         // ignore
       });
     }
