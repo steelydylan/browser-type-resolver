@@ -294,7 +294,7 @@ export const resolveModuleType = async (
           }).catch(() => {
             // ignore
           });
-          if (pkg.exports[key]?.types) {
+          if (pkg.exports[key]?.types?.replace) {
             dependencies[`${lib}/${key.replace("./", "")}/index.d.ts`] = `export * from '${lib}/${pkg.exports[key].types.replace(".d.ts", "")}'`;
           }
           if (subDependencies) {
