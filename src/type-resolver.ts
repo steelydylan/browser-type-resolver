@@ -113,8 +113,6 @@ function getModuleNameFromPath(path: string): string {
   return "";
 }
 
-const urlsetter = new Set<string>();
-
 async function setDependencies({
   library,
   version,
@@ -126,6 +124,7 @@ async function setDependencies({
   parentModule: string
   options?: Options
 }): Promise<{ [key: string ]: string }> {
+  const urlsetter = new Set<string>();
   async function processFile(
     path: string,
     dependencies: { [key: string]: string } = {}
@@ -286,6 +285,12 @@ export const resolveModuleType = async (
   version = "latest",
   options: Options = { cache: false }
 ) => {
+  if (options.cache) {
+    const cache = await localforage.getItem<{ [key: string]: string }>('dependencies:' + lib + '@' + version);
+    if (cache) {
+      return cache;
+    }
+  }
   const pkgStr = await fetchFile(`https://esm.sh/${lib}@${version}/package.json`);
   const pkg = saveJsonParse(pkgStr);
   let dependencies = await setDependencies({
@@ -318,6 +323,9 @@ export const resolveModuleType = async (
   }
   if (pkg.types && pkg.types !== "./index.d.ts") {
     dependencies[`${lib}/index.d.ts`] = `export * from './${pkg.types.replace(".d.ts", "")}'`;
+  }
+  if (options.cache) {
+    await localforage.setItem('dependencies:' + lib + '@' + version, dependencies);
   }
   return dependencies;
 };
