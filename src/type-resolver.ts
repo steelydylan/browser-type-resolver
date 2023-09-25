@@ -114,6 +114,7 @@ function getModuleNameFromPath(path: string): string {
 }
 
 const urlsetter = new Set<string>();
+
 async function setDependencies({
   library,
   version,
@@ -181,7 +182,7 @@ async function setDependencies({
       content.match(
         /require\(['"]https:\/\/esm\.sh\/v\d+\/[^']+['"]\)/g
       ) || []
-    ).map((line) => line.match(/'https:\/\/esm\.sh\/[^']+'/)?.[0]);
+    ).map((line) => line.match(/['"](https:\/\/esm\.sh\/[^']+)['"]/)?.[1]);
 
     for (const url of importUrls || []) {
       if (!url) {
