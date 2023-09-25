@@ -126,13 +126,6 @@ async function setDependencies({
   parentModule: string
   options?: Options
 }): Promise<{ [key: string ]: string }> {
-  const storageKey = `dependencies:${library}@${version}${parentModule}`
-  if (options.cache) {
-    const savedDependencies = await localforage.getItem(storageKey) as { [key: string]: string } | null;
-    if (savedDependencies) {
-      return savedDependencies;
-    }
-  }
   async function processFile(
     path: string,
     dependencies: { [key: string]: string } = {}
@@ -262,10 +255,6 @@ async function setDependencies({
       await processFile(url ?? "", dependencies).catch(() => {
         // ignore
       });
-    }
-
-    if (options.cache) {
-      await localforage.setItem(storageKey, dependencies);
     }
 
     return dependencies;
