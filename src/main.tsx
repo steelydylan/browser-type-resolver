@@ -18,9 +18,6 @@ function App() {
   useEffect(() => {
     resolveAllModuleType(deps, { cache: true }).then((result) => {
       setDependencies(result);
-      resolveAllModuleType(deps, { cache: true }).then((result) => {
-        setDependencies(result);
-      });
     })
   }, []);
 
