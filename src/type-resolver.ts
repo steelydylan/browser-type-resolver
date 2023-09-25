@@ -1,33 +1,45 @@
 import localforage from "localforage";
 
+type Options = {
+  cache?: boolean;
+}
+
 const urlMap = new Map<string, string>();
 
-async function fetchFile(url: string): Promise<string> {
+async function fetchFile(url: string, options?: Options): Promise<string> {
   if (urlMap.has(url)) {
     return urlMap.get(url) ?? "";
   }
-  const cache = await localforage.getItem<string>('content:' + url);
-  if (cache) {
-    return cache;
+  if (options?.cache) {
+    const cache = await localforage.getItem<string>('content:' + url);
+    if (cache) {
+      return cache;
+    }
   }
   const response = await fetch(url);
   const text = await response.text();
-  await localforage.setItem('content:' + url, text);
+  if (options?.cache) {
+    await localforage.setItem('content:' + url, text);
+  }
   urlMap.set(url, text);
   return text;
 }
 
-async function fetchFileTypeUrl(url: string): Promise<string> {
+async function fetchFileTypeUrl(url: string, options?: Options): Promise<string> {
   if (urlMap.has(url)) {
     return urlMap.get(url) ?? "";
   }
-  const cache = await localforage.getItem<string>('types:' + url);
-  if (cache) {
-    return cache;
+  if (options?.cache) {
+    const cache = await localforage.getItem<string>('typeUrl:' + url);
+    if (cache) {
+      return cache;
+    }
   }
   const res = await fetch(url);
   const dtsUrl = res.headers.get("x-typescript-types") ?? ""
-  await localforage.setItem('types:' + url, dtsUrl);
+  if (options?.cache) {
+    await localforage.setItem('typeUrl:' + url, dtsUrl);
+  }
   urlMap.set(url, dtsUrl);
   return dtsUrl;
 }
@@ -106,22 +118,26 @@ async function setDependencies({
   library,
   version,
   parentModule = '',
+  options = { cache: false }
 }:{
   library: string,
   version: string,
   parentModule: string
+  options?: Options
 }): Promise<{ [key: string ]: string }> {
   const storageKey = `dependencies:${library}@${version}${parentModule}`
-  const savedDependencies = await localforage.getItem(storageKey) as { [key: string]: string } | null;
-  if (savedDependencies) {
-    return savedDependencies;
+  if (options.cache) {
+    const savedDependencies = await localforage.getItem(storageKey) as { [key: string]: string } | null;
+    if (savedDependencies) {
+      return savedDependencies;
+    }
   }
   async function processFile(
     path: string,
     dependencies: { [key: string]: string } = {}
   ): Promise<{ [key: string]: string }> {
     const moduleName = getModuleNameFromPath(path);
-    const content = await fetchFile(path);
+    const content = await fetchFile(path, options);
     if (!moduleName) {
       return dependencies;
     }
@@ -247,7 +263,9 @@ async function setDependencies({
       });
     }
 
-    await localforage.setItem(storageKey, dependencies);
+    if (options.cache) {
+      await localforage.setItem(storageKey, dependencies);
+    }
 
     return dependencies;
   }
@@ -255,11 +273,12 @@ async function setDependencies({
   if (parentModule) {
     const diffPath = library.replace(parentModule, "").replace("/", "");
     const dtsUrl = await fetchFileTypeUrl(
-      `https://esm.sh/${parentModule}@${version}/${diffPath}`
+      `https://esm.sh/${parentModule}@${version}/${diffPath}`,
+      options
     );
     return await processFile(dtsUrl);
   } else {
-    const dtsUrl = await fetchFileTypeUrl(`https://esm.sh/${library}@${version}`);
+    const dtsUrl = await fetchFileTypeUrl(`https://esm.sh/${library}@${version}`, options);
     return await processFile(dtsUrl);
   }
 }
@@ -275,6 +294,7 @@ function saveJsonParse(json: string) {
 export const resolveModuleType = async (
   lib: string,
   version = "latest",
+  options: Options = { cache: false }
 ) => {
   const pkgStr = await fetchFile(`https://esm.sh/${lib}@${version}/package.json`);
   const pkg = saveJsonParse(pkgStr);
@@ -282,6 +302,7 @@ export const resolveModuleType = async (
     library: lib,
     version,
     parentModule: "",
+    options,
   });
   if (pkg.exports) {
     await Promise.all(
@@ -291,6 +312,7 @@ export const resolveModuleType = async (
             library: `${lib}/${key.replace("./", "")}`,
             version,
             parentModule: lib,
+            options,
           }).catch(() => {
             // ignore
           });
@@ -310,12 +332,13 @@ export const resolveModuleType = async (
   return dependencies;
 };
 
-export const resolveAllModuleType = async (libs: { [key: string]: string }) => {
+export const resolveAllModuleType = async (libs: { [key: string]: string }, options: Options = { cache: false }
+  ) => {
   let dependencies: { [key: string]: string } = {};
   await Promise.all(
     Object.keys(libs).map(async (lib) => {
       const version = libs[lib];
-      const subDependencies = await resolveModuleType(lib, version);
+      const subDependencies = await resolveModuleType(lib, version, options);
       dependencies = { ...dependencies, ...subDependencies };
     })
   );
