@@ -16,13 +16,17 @@ async function fetchFile(url: string, options?: Options): Promise<string> {
       return cache;
     }
   }
-  const response = await fetch(url);
-  const text = await response.text();
-  if (options?.cache) {
-    await localforage.setItem('content:' + url, text);
+  try {
+    const response = await fetch(url);
+    const text = await response.text();
+    if (options?.cache) {
+      await localforage.setItem('content:' + url, text);
+    }
+    urlMap.set(url, text);
+    return text;
+  } catch (e) {
+    return "";
   }
-  urlMap.set(url, text);
-  return text;
 }
 
 async function fetchFileTypeUrl(url: string, options?: Options): Promise<string> {
@@ -132,6 +136,9 @@ async function setDependencies({
     const moduleName = getModuleNameFromPath(path);
     const content = await fetchFile(path, options);
     if (!moduleName) {
+      return dependencies;
+    }
+    if (!content) {
       return dependencies;
     }
     if (simplifyImport(content)) {
@@ -259,16 +266,20 @@ async function setDependencies({
     return dependencies;
   }
 
-  if (parentModule) {
-    const diffPath = library.replace(parentModule, "").replace("/", "");
-    const dtsUrl = await fetchFileTypeUrl(
-      `https://esm.sh/${parentModule}@${version}/${diffPath}`,
-      options
-    );
-    return await processFile(dtsUrl);
-  } else {
-    const dtsUrl = await fetchFileTypeUrl(`https://esm.sh/${library}@${version}`, options);
-    return await processFile(dtsUrl);
+  try {
+    if (parentModule) {
+      const diffPath = library.replace(parentModule, "").replace("/", "");
+      const dtsUrl = await fetchFileTypeUrl(
+        `https://esm.sh/${parentModule}@${version}/${diffPath}`,
+        options
+      );
+      return await processFile(dtsUrl);
+    } else {
+      const dtsUrl = await fetchFileTypeUrl(`https://esm.sh/${library}@${version}`, options);
+      return await processFile(dtsUrl);
+    }
+  } catch (e) {
+    return {};
   }
 }
 
