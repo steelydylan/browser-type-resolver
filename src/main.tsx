@@ -16,7 +16,7 @@ function App() {
   const [dependencies, setDependencies] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    resolveAllModuleType(deps, { cache: true }).then((result) => {
+    resolveAllModuleType(deps, { cache: false }).then((result) => {
       setDependencies(result);
     })
   }, []);

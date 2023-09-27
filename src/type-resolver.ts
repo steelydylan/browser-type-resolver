@@ -327,7 +327,10 @@ export const resolveModuleType = async (
   if (options.cache) {
     await localforage.setItem('dependencies:' + lib + '@' + version, dependencies);
   }
-  return dependencies;
+  return Object.keys(dependencies).reduce((acc, key) => {
+    const newKey = key.replace("~.d.ts", ".d.ts")
+    return { ...acc, [newKey]: dependencies[key] };
+  }, {});
 };
 
 export const resolveAllModuleType = async (libs: { [key: string]: string }, options: Options = { cache: false }
