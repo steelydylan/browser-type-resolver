@@ -330,7 +330,7 @@ export const resolveModuleType = async (
   return Object.keys(dependencies).reduce((acc, key) => {
     const newKey = key.replace("~.d.ts", ".d.ts")
     return { ...acc, [newKey]: dependencies[key] };
-  }, {});
+  }, {}) as Record<string, string>;
 };
 
 export const resolveAllModuleType = async (libs: { [key: string]: string }, options: Options = { cache: false }
