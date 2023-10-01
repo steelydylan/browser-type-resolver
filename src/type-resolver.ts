@@ -335,13 +335,14 @@ export const resolveModuleType = async (
   if (pkg.types && pkg.types !== "./index.d.ts") {
     dependencies[`${lib}/index.d.ts`] = `export * from './${pkg.types.replace(".d.ts", "")}'`;
   }
-  if (options.cache) {
-    await localforage.setItem('dependencies:' + lib + '@' + version, dependencies);
-  }
-  return Object.keys(dependencies).reduce((acc, key) => {
+  const result = Object.keys(dependencies).reduce((acc, key) => {
     const newKey = key.replace("~.d.ts", ".d.ts")
     return { ...acc, [newKey]: dependencies[key] };
   }, {}) as Record<string, string>;
+  if (options.cache) {
+    await localforage.setItem('dependencies:' + lib + '@' + version, result);
+  }
+  return result;
 };
 
 export const resolveAllModuleType = async (libs: { [key: string]: string }, options: Options = { cache: false }

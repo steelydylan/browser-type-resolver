@@ -7,6 +7,7 @@ import { lightTheme } from '@uiw/react-json-view/light';
 const deps = {
   "react-dom": "18.2.0",
   "react": "18.2.0",
+  "react-router-dom": "6.15.0"
   // "react-hook-form": "7.45.4",
   // "@hookform/resolvers": "3.3.0",
   // "zod": "3.22.2"
